@@ -1,0 +1,17 @@
+[package]
+name = "read_dir"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+cc = "1.0"
+
+[lib]
+name = "rust_lib"
+crate-type = ["staticlib"]
+
+[dependencies]
+notify = "6.1.1"
+cc = "1.0.83"
