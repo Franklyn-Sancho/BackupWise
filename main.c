@@ -3,20 +3,33 @@
 #include <unistd.h>
 #include <sys/inotify.h>
 #include <limits.h>
+#include <string.h>
+#include "copy_dir_to.h"
 
-extern int copy_dir_to();
+/* extern int copy_dir_to(); // rust function
+extern int copy_file_to(const char* filename); */
 
-#define BUF_LEN (10 * (sizeof(struct inotify_event) + NAME_MAX + 1))
+#define EVENT_SIZE  (sizeof(struct inotify_event))
+#define BUF_LEN     (1024 * (EVENT_SIZE + NAME_MAX + 1))
+#define WATCH_PATH  "/home/franklyn/Documentos/Códigos/testanto backup"
 
 void handle_event(struct inotify_event *event)
 {
-    if (event->len)
+    if (event->len > 0 && strncmp(event->name, ".goutputstream", 14) != 0)
     {
         if (event->mask & IN_CREATE)
         {
             printf("The file %s was created.\n", event->name);
-            copy_dir_to();
+            copy_file_to(event->name);
             return;
+        }
+        else if (event->mask & IN_MOVED_FROM)
+        {
+            printf("The file %s was moved or renamed from.\n", event->name);
+        }
+        else if (event->mask & IN_MOVED_TO)
+        {
+            printf("The file %s was moved or renamed to.\n", event->name);
         }
         else if (event->mask & IN_DELETE)
         {
@@ -27,12 +40,31 @@ void handle_event(struct inotify_event *event)
             printf("The file %s was modified.\n", event->name);
         }
     }
-} 
+}
 
-int check_event()
+void check_event(int fd)
 {
-    int fd, wd, length;
     char buffer[BUF_LEN];
+    int length, i = 0;
+
+    length = read(fd, buffer, BUF_LEN);
+    if (length < 0)
+    {
+        perror("read");
+        exit(EXIT_FAILURE);
+    }
+
+    while (i < length)
+    {
+        struct inotify_event *event = (struct inotify_event *)&buffer[i];
+        handle_event(event);
+        i += EVENT_SIZE + event->len;
+    }
+}
+
+int main()
+{
+    int fd, wd;
 
     fd = inotify_init();
     if (fd < 0)
@@ -41,43 +73,22 @@ int check_event()
         exit(EXIT_FAILURE);
     }
 
-    wd = inotify_add_watch(fd, "/home/franklyn/Documentos/Códigos/testanto backup", IN_MODIFY | IN_CREATE | IN_DELETE);
+    wd = inotify_add_watch(fd, WATCH_PATH, IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO | IN_MOVED_FROM);
     if (wd < 0)
     {
         perror("inotify_add_watch");
         exit(EXIT_FAILURE);
     }
 
-    printf("Diretório está sendo escutado... \n");
+    printf("O Diretório está sendo escutado... \n");
 
     while (1)
     {
-        length = read(fd, buffer, BUF_LEN);
-        if (length < 0)
-        {
-            perror("read");
-            break;
-        }
-
-        for (int i = 0; i < length;)
-        {
-            struct inotify_event *event = (struct inotify_event *)&buffer[i];
-            handle_event(event);
-            i += sizeof(struct inotify_event) + event->len;
-        }
+        check_event(fd);
     }
 
-    (void)inotify_rm_watch(fd, wd);
-    (void)close(fd);
+    inotify_rm_watch(fd, wd);
+    close(fd);
 
-    return 0;
-}
-
-int main() {
-    /* int result = copy_dir_to();
-    printf("Called Rust function, result: %d\n", result);
-    return 0; */
-
-    check_event();
     return 0;
 }

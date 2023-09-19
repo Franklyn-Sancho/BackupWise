@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "*.ejs": "html",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "copy_files.h": "c",
+        "string.h": "c",
+        "unistd.h": "c",
+        "limits.h": "c"
     }
 }
