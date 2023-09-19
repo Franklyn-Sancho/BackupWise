@@ -1,13 +1,10 @@
-#include <stdio.h>
+/* #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/inotify.h>
 #include <limits.h>
 #include <string.h>
 #include "copy_dir_to.h"
-
-/* extern int copy_dir_to(); // rust function
-extern int copy_file_to(const char* filename); */
 
 #define EVENT_SIZE  (sizeof(struct inotify_event))
 #define BUF_LEN     (1024 * (EVENT_SIZE + NAME_MAX + 1))
@@ -91,4 +88,4 @@ int main()
     close(fd);
 
     return 0;
-}
+} */
