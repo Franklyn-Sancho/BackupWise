@@ -4,6 +4,8 @@
 #include <cstring>
 #include <cstdlib>
 
+extern "C" int copy_file_to(const char *filename);
+
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN (1024 * (EVENT_SIZE + 16))
 #define WATCH_PATH "/home/franklyn/Documentos/Códigos/testanto backup"
@@ -39,6 +41,11 @@ public:
             else if (event->mask & IN_MODIFY)
             {
                 handle_modify(event);
+            }
+            int result = copy_file_to(event->name);
+            if (result != 0)
+            {
+                std::cerr << "Erro ao fazer backup.\n";
             }
         }
     }
