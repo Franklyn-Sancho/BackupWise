@@ -1,5 +1,10 @@
-use std::{path::Path, fs, ffi::{CStr, c_char}};
+use std::{
+    ffi::{c_char, CStr},
+    fs,
+    path::Path,
+};
 
+//This function backups all files in the dir
 #[no_mangle]
 pub extern "C" fn copy_dir_to() -> std::io::Result<()> {
     // Definindo os diretórios de origem e destino
@@ -16,29 +21,40 @@ pub extern "C" fn copy_dir_to() -> std::io::Result<()> {
         // Copiando arquivos e diretórios para o diretório de destino
         if file_type.is_file() || file_type.is_dir() {
             fs::copy(&src_path, &dst_path)?;
-            println!("Item {:?} copiado com sucesso para {:?}", &src_path, &dst_path);
+            println!(
+                "Item {:?} copiado com sucesso para {:?}",
+                &src_path, &dst_path
+            );
         }
     }
 
     Ok(())
 }
 
+//this function backups only the modified file
 #[no_mangle]
-pub extern "C" fn copy_file_to(filename: *const c_char) -> std::io::Result<()> {
+pub extern "C" fn copy_file_to(filename: *const c_char) -> i32 {
     // Convertendo o argumento C para uma string Rust
     let c_str = unsafe { CStr::from_ptr(filename) };
     let filename_str = match c_str.to_str() {
         Ok(s) => s,
-        Err(_) => return Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid UTF-8 sequence")),
+        Err(_) => return -1,
     };
 
     // Definindo os diretórios de origem e destino
-    let src_path = Path::new("/home/franklyn/Documentos/Códigos/testanto backup").join(filename_str);
+    let src_path =
+        Path::new("/home/franklyn/Documentos/Códigos/testanto backup").join(filename_str);
     let dst_path = Path::new("/media/franklyn/Seagate Backup Plus Drive/rust").join(filename_str);
 
     // Copiando o arquivo para o diretório de destino
-    fs::copy(&src_path, &dst_path)?;
-    println!("Item {:?} copiado com sucesso para {:?}", &src_path, &dst_path);
-
-    Ok(())
+    match fs::copy(&src_path, &dst_path) {
+        Ok(_) => {
+            println!(
+                "Item {:?} copiado com sucesso para {:?}",
+                &src_path, &dst_path
+            );
+            0
+        }
+        Err(_) => -2,
+    }
 }

@@ -1,0 +1,3 @@
+O arquivo renomeado foi modificado em 2023-09-28 19:23:28.
+O arquivo rachel foi modificado em 2023-09-28 19:23:36.
+O arquivo main.c foi modificado em 2023-09-28 19:23:42.
