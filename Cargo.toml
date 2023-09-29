@@ -13,5 +13,6 @@ name = "rust_lib"
 crate-type = ["staticlib"]
 
 [dependencies]
+chrono = "0.4.31"
 notify = "6.1.1"
 cc = "1.0.83"
