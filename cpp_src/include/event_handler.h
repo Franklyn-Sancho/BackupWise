@@ -6,11 +6,11 @@
 
 class EventHandler
 {
-    int fd;
+    int inotifyFd;
     std::string last_moved_from;
 
 public:
-    EventHandler(int fd);
+    EventHandler(int inotifyFd);
     void handle(struct inotify_event *event);
 
 private:

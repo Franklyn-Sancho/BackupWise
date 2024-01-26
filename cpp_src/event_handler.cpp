@@ -8,7 +8,7 @@ extern "C" int copy_file_to(const char *filename);
 
 #define WATCH_PATH "/home/franklyn/Documentos/Códigos/testanto backup"
 
-EventHandler::EventHandler(int fd) : fd(fd) {}
+EventHandler::EventHandler(int inotifyFd) : inotifyFd(inotifyFd) {}
 
 void EventHandler::handle(struct inotify_event *event)
 {
@@ -54,7 +54,7 @@ void EventHandler::handle_create(struct inotify_event *event)
     {
         usleep(1000);
         std::string new_dir = std::string(WATCH_PATH) + "/" + event->name;
-        int wd = inotify_add_watch(fd, new_dir.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO | IN_MOVED_FROM);
+        int wd = inotify_add_watch(inotifyFd, new_dir.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO | IN_MOVED_FROM);
         if (wd < 0)
         {
             perror("inotify_add_watch");

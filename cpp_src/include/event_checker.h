@@ -5,11 +5,11 @@
 
 class EventChecker
 {
-    int fd;
+    int inotifyFd;
     EventHandler handler;
 
 public:
-    EventChecker(int fd, EventHandler handler);
+    EventChecker(int inotifyFd, EventHandler handler);
     void check();
 };
 

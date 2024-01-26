@@ -4,14 +4,12 @@
 #define BUF_LEN (1024 * (EVENT_SIZE + 16))
 #define EVENT_SIZE (sizeof(struct inotify_event))
 
-EventChecker::EventChecker(int fd, EventHandler handler) : fd(fd), handler(handler) {}
-
-
+EventChecker::EventChecker(int inotifyFd, EventHandler handler) : inotifyFd(inotifyFd), handler(handler) {}
 
 void EventChecker::check()
 {
     char buffer[BUF_LEN];
-    int length = read(fd, buffer, BUF_LEN);
+    int length = read(inotifyFd, buffer, BUF_LEN);
 
     if (length < 0)
     {
