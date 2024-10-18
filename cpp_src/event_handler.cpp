@@ -12,6 +12,7 @@ EventHandler::EventHandler(int inotifyFd) : inotifyFd(inotifyFd) {}
 
 void EventHandler::handle(struct inotify_event *event)
 {
+
     if (event->len > 0 && strncmp(event->name, ".goutputstream", 14) != 0)
     {
         if (event->mask & IN_CREATE)
@@ -20,6 +21,7 @@ void EventHandler::handle(struct inotify_event *event)
         }
         else if (event->mask & IN_MOVED_FROM)
         {
+            
             handle_moved_from(event);
         }
         else if (event->mask & IN_MOVED_TO)
@@ -40,6 +42,10 @@ void EventHandler::handle(struct inotify_event *event)
             std::cerr << "Erro ao fazer backup.\n";
         }
     }
+    else
+    {
+        std::cout << "Evento ignorado: nome do arquivo é vazio ou corresponde ao padrão ignorado." << std::endl;
+    }
 }
 
 void EventHandler::print_event_message(const std::string &event_type, const std::string &file_name)
@@ -49,9 +55,11 @@ void EventHandler::print_event_message(const std::string &event_type, const std:
 
 void EventHandler::handle_create(struct inotify_event *event)
 {
+
     print_event_message("criado", event->name);
     if (event->mask & IN_ISDIR)
     {
+        std::cout << "Novo diretório criado: " << event->name << std::endl;
         usleep(1000);
         std::string new_dir = std::string(WATCH_PATH) + "/" + event->name;
         int wd = inotify_add_watch(inotifyFd, new_dir.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO | IN_MOVED_FROM);
@@ -61,28 +69,30 @@ void EventHandler::handle_create(struct inotify_event *event)
             exit(EXIT_FAILURE);
         }
     }
-    write_log("modificado", event->name);
+    write_log("criado", event->name);
 }
 
 void EventHandler::handle_moved_from(struct inotify_event *event)
 {
     last_moved_from = event->name;
-    write_log("modificado", event->name);
+    write_log("movido_de", event->name);
 }
 
 void EventHandler::handle_moved_to(struct inotify_event *event)
 {
     std::cout << "O arquivo " << last_moved_from << " foi movido ou renomeado para " << event->name << ".\n";
     last_moved_from.clear();
+    write_log("movido_para", event->name);
 }
 
 void EventHandler::handle_delete(struct inotify_event *event)
 {
     print_event_message("deletado", event->name);
-    write_log("modificado", event->name);
+    write_log("deletado", event->name);
 }
 
 void EventHandler::handle_modify(struct inotify_event *event)
 {
     print_event_message("modificado", event->name);
+    write_log("modificado", event->name);
 }
