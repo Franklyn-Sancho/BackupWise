@@ -51,6 +51,11 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "inotify.h": "c",
-        "event_handler.h": "c"
+        "event_handler.h": "c",
+        "compare": "c",
+        "concepts": "c",
+        "cstring": "c",
+        "ctime": "c",
+        "numbers": "c"
     }
 }

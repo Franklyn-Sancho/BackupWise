@@ -2,14 +2,13 @@
 #include <unistd.h>
 #include <iostream>
 
-#define BUF_LEN (1024 * (EVENT_SIZE + 16))
 #define EVENT_SIZE (sizeof(struct inotify_event))
+#define BUF_LEN (1024 * (EVENT_SIZE + 16))
 
-EventChecker::EventChecker(int inotifyFd, EventHandler handler) : inotifyFd(inotifyFd), handler(handler) {}
+EventChecker::EventChecker(int inotifyFd, EventHandler &handler) : inotifyFd(inotifyFd), handler(handler) {}
 
 void EventChecker::check()
 {
-    std::cout << "Verificando eventos..." << std::endl; // Log para saber que o check foi chamado
     char buffer[BUF_LEN];
     int length = read(inotifyFd, buffer, BUF_LEN);
 
@@ -24,8 +23,16 @@ void EventChecker::check()
     {
         struct inotify_event *event = (struct inotify_event *)&buffer[i];
 
-        handler.handle(event);
+        // Attempt to handle each event with a try-catch block to capture failures
+        try {
+            handler.handle(event);
+        } catch (const std::exception &e) {
+            std::cerr << "Error processing event: " << e.what() << std::endl;
+        }
+
         i += EVENT_SIZE + event->len;
     }
 }
+
+
 

@@ -9,7 +9,7 @@ class EventChecker
     EventHandler handler;
 
 public:
-    EventChecker(int inotifyFd, EventHandler handler);
+    EventChecker(int inotifyFd, EventHandler &handler);
     void check();
 };
 

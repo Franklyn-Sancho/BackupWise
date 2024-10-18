@@ -8,9 +8,11 @@ class EventHandler
 {
     int inotifyFd;
     std::string last_moved_from;
+    std::string backup_path; // Adiciona uma variável para o diretório de backup
 
 public:
-    EventHandler(int inotifyFd);
+    // Modifica o construtor para aceitar o backup_path
+    EventHandler(int inotifyFd, const std::string& backup_path);
     void handle(struct inotify_event *event);
 
 private:
