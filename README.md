@@ -1,5 +1,8 @@
 # BackupWise - A File Backup Application CLI
 
+![BackupWise Logo](https://github.com/Franklyn-Sancho/BackupWise/blob/main/backup.png)
+
+
 ## Overview
 This application in C++ and RUST is designed to monitor a specified directory for file changes and automatically back up modified files to a designated backup location. It utilizes the Linux inotify API to listen for file system events such as creation, modification, movement, and deletion of files.
 
