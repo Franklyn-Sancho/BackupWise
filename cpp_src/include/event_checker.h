@@ -6,7 +6,7 @@
 class EventChecker
 {
     int inotifyFd;
-    EventHandler handler;
+    EventHandler &handler; // Usa referência para o handler
 
 public:
     EventChecker(int inotifyFd, EventHandler &handler);
@@ -14,3 +14,4 @@ public:
 };
 
 #endif // EVENT_CHECKER_H
+
