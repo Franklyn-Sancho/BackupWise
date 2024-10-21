@@ -14,7 +14,6 @@ void EventChecker::check() {
 
     if (length < 0) {
         if (errno == EINTR) {
-            // Interrupção do sistema, tentar novamente
             return;
         }
         perror("read");
@@ -25,9 +24,7 @@ void EventChecker::check() {
     while (i < length) {
         struct inotify_event *event = (struct inotify_event *)&buffer[i];
 
-        // Verifica se o evento possui um comprimento válido
         if (event->len > 0) {
-            // Tenta lidar com o evento usando try-catch para capturar possíveis falhas
             try {
                 handler.handle(event);
             } catch (const std::exception &e) {

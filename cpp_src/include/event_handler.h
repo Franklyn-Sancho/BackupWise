@@ -11,7 +11,6 @@ class EventHandler
     std::string backup_path;
 
 public:
-    // Modifica o construtor para aceitar o backup_path
     EventHandler(int inotifyFd, const std::string& backup_path);
     void handle(struct inotify_event *event);
 
@@ -25,7 +24,6 @@ private:
     void handle_file_event(struct inotify_event *event, const std::string &src_path);
     void handle_directory_event(struct inotify_event *event, const std::string &src_path);
 
-    // Novos métodos para lidar com backup de arquivos e diretórios
     void backup_file(const std::string &file_path);
     void backup_directory(const std::string &dir_path);
 };

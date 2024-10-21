@@ -1,5 +1,5 @@
 use std::{
-    ffi::{c_char, CStr},
+    ffi::{c_char, CStr, CString},
     fs::{self, File, OpenOptions},
     io::{self, BufRead, BufReader},
     path::{Path, PathBuf},
@@ -59,7 +59,6 @@ fn c_to_rust_string(filename: *const c_char) -> Result<String, std::str::Utf8Err
     let c_str = unsafe { CStr::from_ptr(filename) };
     c_str.to_str().map(|s| s.to_string())
 }
-
 /* fn define_paths(filename: &str, backup_path: &str) -> (PathBuf, PathBuf) {
     let src_dir = Path::new("/home/franklyn/Documentos/Códigos/testanto backup");
     let dst_dir = Path::new(backup_path);
@@ -69,10 +68,7 @@ fn c_to_rust_string(filename: *const c_char) -> Result<String, std::str::Utf8Err
 fn copy_file(src_path: &Path, dst_path: &Path) -> io::Result<u64> {
     let result = fs::copy(src_path, dst_path);
     if result.is_ok() {
-        println!(
-            "Item {:?} successfully copied to {:?}",
-            src_path, dst_path
-        );
+        println!("Item {:?} successfully copied to {:?}", src_path, dst_path);
     }
     result
 }
@@ -107,58 +103,60 @@ fn write_log(src_path: &Path, log_file: &str) {
     }
 }
 
-// This function backs up all files in the directory
+// Função para copiar diretórios
 #[no_mangle]
-pub extern "C" fn copy_dir_to(src_dir: *const c_char, dst_dir: *const c_char) -> i32 {
-    // Converts C pointers to Rust strings
-    let src_dir_str = c_to_rust_string(src_dir);
-    let dst_dir_str = c_to_rust_string(dst_dir);
+pub extern "C" fn copy_directory(src: *const c_char, dst: *const c_char) -> i32 {
+    let src = unsafe { CStr::from_ptr(src).to_string_lossy().into_owned() };
+    let dst = unsafe { CStr::from_ptr(dst).to_string_lossy().into_owned() };
 
-    if src_dir_str.is_err() || dst_dir_str.is_err() {
-        return -1; // Error in string conversion
+    if src == dst {
+        println!("Ignoring backup for source path: {} as it is the same as destination path.", src);
+        return 0; 
     }
 
-    let src_dir_str = src_dir_str.unwrap();
-    let dst_dir_str = dst_dir_str.unwrap();
+    let src_path = Path::new(&src);
+    let dst_path = Path::new(&dst);
 
-    // Defines the source and destination directories
-    let src_path = Path::new(&src_dir_str);
-    let dst_path = Path::new(&dst_dir_str);
+    
+    match copy_directory_impl(&src_path, &dst_path) {
+        Ok(_) => 0,   
+        Err(_) => -1,
+    }
+}
 
-    // Checks if the source directory exists
-    if !src_path.exists() || !src_path.is_dir() {
-        eprintln!("Invalid source path: {:?}", src_path);
-        return -2; // Source path not found or not a directory
+
+fn copy_directory_impl(src: &Path, dst: &Path) -> io::Result<()> {
+    if !src.exists() || !src.is_dir() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            "Source directory not found or is not a directory",
+        ));
     }
 
-    // Creates the destination directory if it doesn't exist
-    if !dst_path.exists() {
-        fs::create_dir_all(&dst_path).expect("Failed to create destination directory");
+    if !dst.exists() {
+        std::fs::create_dir_all(dst)?;
+        println!("Created directory: {:?}", dst);
     }
 
-    // Reads the directories and files in the source directory
-    for entry_result in src_path.read_dir().expect("Failed to read directory") {
-        let entry = entry_result.expect("Error getting directory entry");
-        let file_type = entry.file_type().expect("Error getting file type");
+    for entry in src.read_dir()? {
+        let entry = entry?;
+        let file_type = entry.file_type()?;
         let src_entry_path = entry.path();
-        let dst_entry_path = dst_path.join(entry.file_name());
+        let dst_entry_path = dst.join(entry.file_name());
 
         if file_type.is_dir() {
-            // Recursively copies subdirectories
-            let result = copy_dir_to(src_entry_path.to_str().unwrap().as_ptr() as *const c_char, dst_entry_path.to_str().unwrap().as_ptr() as *const c_char);
-            if result != 0 {
-                return result; // Returns error if the subdirectory copy fails
-            }
-        } else if file_type.is_file() {
-            // Copies files
-            fs::copy(&src_entry_path, &dst_entry_path).expect("Failed to copy file");
             println!(
-                "File {:?} successfully copied to {:?}",
-                &src_entry_path, &dst_entry_path
+                "Copying directory: {:?} to {:?}",
+                src_entry_path, dst_entry_path
             );
+            copy_directory_impl(&src_entry_path, &dst_entry_path)?; // Chamada recursiva
+        } else if file_type.is_file() {
+            println!("Copying file: {:?} to {:?}", src_entry_path, dst_entry_path);
+            std::fs::copy(&src_entry_path, &dst_entry_path)?;
         }
     }
 
-    0 // Success
+    Ok(())
 }
+
 
