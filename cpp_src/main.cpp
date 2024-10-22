@@ -7,7 +7,8 @@
 #include "include/event_checker.h"
 
 #include "include/zenity_selector.h"
-#include "include/config.h" // Inclui o header para as configurações
+#include "include/config.h" 
+#include "include/notification.h"
 
 int main() {
     const std::string config_file = "config.json";

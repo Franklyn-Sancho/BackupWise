@@ -3,6 +3,7 @@
 #include <cstring>
 #include "include/log.h"
 #include "include/event_handler.h"
+#include "include/notification.h"
 
 extern "C" {
     int copy_file_to(const char *filename, const char *backup_path);
@@ -86,28 +87,24 @@ void EventHandler::handle_directory_event(struct inotify_event *event, const std
     }
 }
 
-void EventHandler::backup_file(const std::string &src_path)
-{
+void EventHandler::backup_file(const std::string &src_path) {
     int result = copy_file_to(src_path.c_str(), backup_path.c_str());
-    if (result != 0)
-    {
+    if (result != 0) {
         std::cerr << "Error while backing up file: " << src_path << "\n";
-    }
-    else
-    {
+    } else {
         std::cout << "Successfully backed up file: " << src_path << " to " << backup_path << std::endl;
+        // Notificar o sucesso do backup
+        send_notification("Backup Completed", "Successfully backed up file: " + src_path);
     }
 }
 
-void EventHandler::backup_directory(const std::string &src_path)
-{
+void EventHandler::backup_directory(const std::string &src_path) {
     int result = copy_directory(src_path.c_str(), backup_path.c_str());
-    if (result != 0)
-    {
+    if (result != 0) {
         std::cerr << "Error while backing up directory: " << result << "\n";
-    }
-    else
-    {
+    } else {
         std::cout << "Successfully backed up directory: " << src_path << " to " << backup_path << std::endl;
+        // Notificar o sucesso do backup
+        send_notification("Backup Completed", "Successfully backed up directory: " + src_path);
     }
 }
