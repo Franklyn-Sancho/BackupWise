@@ -6,20 +6,22 @@
 #include "include/event_handler.h"
 #include "include/event_checker.h"
 
-#include "include/directory_selector.h"
+#include "include/zenity_selector.h"
+
+
 
 int main() {
-    // Seleção do diretório a ser monitorado
-    std::cout << "Selecione o diretório que será monitorado:\n";
-    std::string watch_path = select_directory(); 
-    std::cout << "Você selecionou o diretório a ser monitorado: " << watch_path << "\n";
+    // Select the directory to be monitored using Zenity
+    std::cout << "Select the directory to be monitored:\n";
+    std::string watch_path = select_directory_with_zenity("Select the directory to monitor");
+    std::cout << "You selected the directory to be monitored: " << watch_path << "\n";
 
-    // Seleção do diretório de backup
-    std::cout << "Selecione o diretório onde será feito o backup:\n";
-    std::string backup_path = select_directory(); 
-    std::cout << "Você selecionou o diretório de backup: " << backup_path << "\n";
+    // Select the backup directory using Zenity
+    std::cout << "Select the directory where the backup will be made:\n";
+    std::string backup_path = select_directory_with_zenity("Select the backup directory");
+    std::cout << "You selected the backup directory: " << backup_path << "\n";
 
-    // Configuração do inotify
+    // Inotify configuration
     int inotifyFd = inotify_init();
     if (inotifyFd < 0) {
         perror("inotify_init");
@@ -32,7 +34,7 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    std::cout << "O diretório " << watch_path << " está sendo monitorado... \n";
+    std::cout << "The directory " << watch_path << " is being monitored... \n";
 
     EventHandler handler(inotifyFd, backup_path);
     EventChecker checker(inotifyFd, handler);
