@@ -56,6 +56,9 @@
         "concepts": "c",
         "cstring": "c",
         "ctime": "c",
-        "numbers": "c"
-    }
+        "numbers": "c",
+        "chrono": "cpp",
+        "filesystem": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "enabled"
 }
