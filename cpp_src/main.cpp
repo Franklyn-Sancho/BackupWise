@@ -6,23 +6,20 @@
 #include "include/event_handler.h"
 #include "include/event_checker.h"
 
-#define WATCH_PATH_DEFAULT "/home/franklyn/Documentos/Códigos/testanto backup"
+#include "include/directory_selector.h"
 
-int main()
-{
-    std::string watch_path;
-    std::string backup_path;
+int main() {
+    // Seleção do diretório a ser monitorado
+    std::cout << "Selecione o diretório que será monitorado:\n";
+    std::string watch_path = select_directory(); 
+    std::cout << "Você selecionou o diretório a ser monitorado: " << watch_path << "\n";
 
-    // Prompts the user for the directories
-    std::cout << "Enter the path of the directory to be monitored (default: " << WATCH_PATH_DEFAULT << "): ";
-    std::getline(std::cin, watch_path);
-    if (watch_path.empty()) {
-        watch_path = WATCH_PATH_DEFAULT; // Uses the default if not provided
-    }
+    // Seleção do diretório de backup
+    std::cout << "Selecione o diretório onde será feito o backup:\n";
+    std::string backup_path = select_directory(); 
+    std::cout << "Você selecionou o diretório de backup: " << backup_path << "\n";
 
-    std::cout << "Enter the path of the backup directory: ";
-    std::getline(std::cin, backup_path);
-
+    // Configuração do inotify
     int inotifyFd = inotify_init();
     if (inotifyFd < 0) {
         perror("inotify_init");
@@ -35,9 +32,9 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    std::cout << "The directory " << watch_path << " is being monitored... \n";
+    std::cout << "O diretório " << watch_path << " está sendo monitorado... \n";
 
-    EventHandler handler(inotifyFd, backup_path); // Passes the backup directory
+    EventHandler handler(inotifyFd, backup_path);
     EventChecker checker(inotifyFd, handler);
 
     while (true) {
@@ -49,3 +46,4 @@ int main()
 
     return 0;
 }
+
