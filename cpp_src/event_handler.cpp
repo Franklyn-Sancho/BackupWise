@@ -4,6 +4,7 @@
 #include "include/log.h"
 #include "include/event_handler.h"
 #include "include/notification.h"
+#include "include/compression.h"
 
 extern "C" {
     int copy_file_to(const char *filename, const char *backup_path);
@@ -13,8 +14,8 @@ extern "C" {
 
 #define WATCH_PATH "/home/franklyn/Documentos/Códigos/testanto backup"
 
-EventHandler::EventHandler(int inotifyFd, const std::string &backup_path)
-    : inotifyFd(inotifyFd), backup_path(backup_path) {}
+EventHandler::EventHandler(int inotifyFd, const std::string &backup_path, bool compress_files)
+    : inotifyFd(inotifyFd), backup_path(backup_path), compress_files(compress_files) {}
 
 void EventHandler::handle(struct inotify_event *event)
 {
@@ -96,6 +97,11 @@ void EventHandler::backup_file(const std::string &src_path) {
         // Notificar o sucesso do backup
         send_notification("Backup Completed", "Successfully backed up file: " + src_path);
     }
+
+    // Se compressão estiver ativada, chama a função de compressão
+    if (compress_files) {
+        compress_backup(backup_path);
+    }
 }
 
 void EventHandler::backup_directory(const std::string &src_path) {
@@ -107,4 +113,10 @@ void EventHandler::backup_directory(const std::string &src_path) {
         // Notificar o sucesso do backup
         send_notification("Backup Completed", "Successfully backed up directory: " + src_path);
     }
+
+    // Se compressão estiver ativada, chama a função de compressão
+    if (compress_files) {
+        compress_backup(backup_path);
+    }
+    
 }

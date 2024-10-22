@@ -7,7 +7,7 @@ LDFLAGS = -L ../target/release -lrust_lib -lpthread -ldl
 TARGET = main
 
 # Todos os arquivos .cpp
-SRCS = main.cpp event_checker.cpp event_handler.cpp event_selector.cpp config.cpp log.cpp event_notification.cpp
+SRCS = main.cpp event_checker.cpp event_handler.cpp event_selector.cpp config.cpp log.cpp event_notification.cpp event_backup_option.cpp event_compression.cpp
 
 # Regra padrão
 all: $(TARGET)

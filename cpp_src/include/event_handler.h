@@ -9,9 +9,11 @@ class EventHandler
     int inotifyFd;
     std::string last_moved_from;
     std::string backup_path;
+    bool compress_files; // Variável para controlar a compressão
 
 public:
-    EventHandler(int inotifyFd, const std::string& backup_path);
+    // Corrigir o construtor para incluir compress_files
+    EventHandler(int inotifyFd, const std::string& backup_path, bool compress_files); 
     void handle(struct inotify_event *event);
 
 private:
